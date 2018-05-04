@@ -1,13 +1,25 @@
 import graphene
 
 class Query(graphene.ObjectType):
-    hello = graphene.String(
-        name=graphene.String(default_value='stranger'))
+    person = graphene.String(
+        name=graphene.String(default_value='stranger')
+    )
 
-    def resolve_hello(self, info, name):
+    def resolve_person(self, info, name):
         return f'Hello {name}'
 
-SCHEMA = graphene.Schema(query=Query)
+class PersonMutation(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
 
-result = SCHEMA.execute('{hello {name}}')
-print(result.data)
+    ok = graphene.Boolean(required=True)
+
+    def mutate(self, info, name):
+        if name:
+            return PersonMutation(ok=True)
+        return PersonMutation(ok=False)
+
+class Mutation(graphene.ObjectType):
+    person = PersonMutation.Field()
+
+SCHEMA = graphene.Schema(query=Query, mutation=Mutation)
